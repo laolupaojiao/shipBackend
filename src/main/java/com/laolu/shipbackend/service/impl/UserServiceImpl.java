@@ -1,12 +1,16 @@
 package com.laolu.shipbackend.service.impl;
 
 import com.laolu.shipbackend.dao.UserMapper;
+import com.laolu.shipbackend.jpa.dao.UserDao;
+import com.laolu.shipbackend.jpa.entity.UserEntity;
 import com.laolu.shipbackend.model.User;
 import com.laolu.shipbackend.model.response.UserResponse;
 import com.laolu.shipbackend.service.UserService;
 import com.laolu.shipbackend.utils.CommonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 /**
  * @author wanyi.lu
@@ -15,17 +19,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService {
-
     @Autowired
-    UserMapper userMapper;
+    UserDao userDao;
 
     @Override
-    public User login(User user) throws IllegalAccessException {
-        User result = userMapper.login(user);
-        if (result != null) {
-            UserResponse userResponse = new UserResponse();
-            userResponse = (UserResponse) CommonTools.castAtoB(result, userResponse);
+    public UserResponse login(User user) {
+        Optional<UserEntity> userEntity = userDao.findByUserNameAndPassWord(user.getUserName(), user.getPassWord());
+        if (userEntity.isPresent()) {
+            UserResponse response = new UserResponse();
+            CommonTools.copy(userEntity.get(), response);
+            return response;
         }
-        return userMapper.login(user);
+        return null;
     }
 }
