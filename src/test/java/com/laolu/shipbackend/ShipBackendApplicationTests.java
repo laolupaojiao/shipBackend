@@ -1,7 +1,6 @@
 package com.laolu.shipbackend;
 
 
-import com.laolu.shipbackend.service.StarService;
 import com.laolu.shipbackend.service.StarStoreService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

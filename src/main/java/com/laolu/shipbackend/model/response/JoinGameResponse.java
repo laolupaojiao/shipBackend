@@ -17,4 +17,5 @@ import java.util.List;
 public class JoinGameResponse {
     List<Star> stars;
     List<UserResponse> players;
+    private String token;
 }

@@ -23,7 +23,6 @@ import static com.laolu.shipbackend.utils.JsonResponse.GSON;
 @Component
 public class StoreHandler {
     @Autowired
-    @Qualifier("StarStore")
     StarStoreService starStore;
 
 

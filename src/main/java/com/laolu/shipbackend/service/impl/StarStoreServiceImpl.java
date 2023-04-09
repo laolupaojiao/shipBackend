@@ -72,11 +72,19 @@ public class StarStoreServiceImpl implements StarStoreService {
     public List<StarStoreListResponse> getList(Integer starId) {
         QStoreEntity qStoreEntity = QStoreEntity.storeEntity;
         QSellEntity qSellEntity = QSellEntity.sellEntity;
-        List<StarStoreListResponse> fetch = jpaQueryFactory.select(Projections.bean(StarStoreListResponse.class))
+        return jpaQueryFactory.
+                select(Projections.bean(StarStoreListResponse.class,
+                        qStoreEntity.name,
+                        qStoreEntity.description,
+                        qStoreEntity.pic,
+                        qSellEntity.leftAmount,
+                        qSellEntity.originAmount,
+                        qSellEntity.price,
+                        qSellEntity.type
+                ))
                 .from(qSellEntity)
                 .leftJoin(qStoreEntity)
                 .on(qSellEntity.storeId.eq(qStoreEntity.id))
                 .where(qSellEntity.leftAmount.gt(0).and(qSellEntity.starId.eq(starId))).fetch();
-        return fetch;
     }
 }

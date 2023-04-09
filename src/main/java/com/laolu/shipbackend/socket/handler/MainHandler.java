@@ -23,7 +23,6 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 import static com.laolu.shipbackend.utils.JsonResponse.GSON;
 
@@ -69,6 +68,7 @@ public class MainHandler {
                 }
                 joinGameResponse.setStars(stars);
                 joinGameResponse.setPlayers(players);
+                joinGameResponse.setToken(session.getId());
                 session.sendMessage(new TextMessage(JsonResponse.success(joinGameResponse, ContactType.JOIN_GAME, user.getAuthKey())));
                 SocketHandle.USER_IDS.add(user.getId());
                 SocketHandle.CLIENT_POOL.put(session.getId(),socketClient);
