@@ -5,6 +5,7 @@ import com.laolu.shipbackend.model.request.store.BuyRequest;
 import com.laolu.shipbackend.service.StarStoreService;
 import com.laolu.shipbackend.socket.SocketHandle;
 import com.laolu.shipbackend.utils.AESTools;
+import com.laolu.shipbackend.utils.CommonResponse;
 import com.laolu.shipbackend.utils.JsonResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,11 +34,8 @@ public class StoreHandler {
             User user = SocketHandle.CLIENT_POOL.get(session.getId()).getUser();
             if (!ObjectUtils.isEmpty(buyRequest) && !ObjectUtils.isEmpty(user)) {
                 synchronized (buyRequest.getTargetId()) {
-                    if (starStore.buy(buyRequest)) {
-                        session.sendMessage(new TextMessage(JsonResponse.message(200, "购买成功", user.getAuthKey())));
-                    } else {
-                        session.sendMessage(new TextMessage(JsonResponse.message(500, "购买失败", user.getAuthKey())));
-                    }
+                    CommonResponse<String> result = starStore.buy(buyRequest);
+                    session.sendMessage(new TextMessage(JsonResponse.message(result.getCode(), result.getMessage(), user.getAuthKey())));
                 }
             } else {
                 session.sendMessage(new TextMessage(JsonResponse.message(403, "请重新登录", user.getAuthKey())));

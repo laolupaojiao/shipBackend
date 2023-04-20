@@ -1,7 +1,11 @@
 package com.laolu.shipbackend.config;
 
+import com.laolu.shipbackend.model.SocketClient;
+import com.laolu.shipbackend.socket.SocketHandle;
+import com.laolu.shipbackend.utils.UserPool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,15 +32,17 @@ public class Interceptor implements HandlerInterceptor {
         String token = "";
         String authorization = "";
         // 下载token为url拼接
-        authorization = request.getHeader("Authorization");
+        authorization = request.getHeader("AuthToken");
         if (authorization != null) {
-            String[] temp = authorization.split(" ");
-            if (temp.length > 1) {
-                token = temp[1];
+            token = authorization;
+
+            if (SocketHandle.CLIENT_POOL.containsKey(authorization)) {
+                SocketClient socketClient = SocketHandle.CLIENT_POOL.get(authorization);
+                UserPool.setUser(socketClient.getUser());
             }
         }
-
         log.info("{} {} {}",request.getMethod(), request.getRequestURI().toLowerCase(), token);
+        System.out.println(token);
         return true;
     }
 }

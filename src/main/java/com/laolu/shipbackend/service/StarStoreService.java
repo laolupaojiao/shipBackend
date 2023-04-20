@@ -3,6 +3,7 @@ package com.laolu.shipbackend.service;
 import com.laolu.shipbackend.model.request.store.BuyRequest;
 import com.laolu.shipbackend.model.request.store.SellRequest;
 import com.laolu.shipbackend.model.response.StarStoreListResponse;
+import com.laolu.shipbackend.utils.CommonResponse;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface StarStoreService {
      * @param buyRequest 实体类
      * @return boolean
      */
-    boolean buy(BuyRequest buyRequest);
+    CommonResponse<String> buy(BuyRequest buyRequest);
 
     /**
      * 出售

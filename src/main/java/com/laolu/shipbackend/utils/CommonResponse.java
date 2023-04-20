@@ -81,7 +81,7 @@ public class CommonResponse<T> implements Serializable {
         return baseCreate(ResponseCode.RUNNING, message, null);
     }
 
-    private static <T> CommonResponse<T> baseCreate(Integer code, String msg, T data) {
+    public static <T> CommonResponse<T> baseCreate(Integer code, String msg, T data) {
         CommonResponse<T> result = new CommonResponse<>();
         result.setCode(code);
         result.setMessage(msg);

@@ -2,10 +2,13 @@ package com.laolu.shipbackend.controller;
 
 import com.google.gson.Gson;
 import com.laolu.shipbackend.model.User;
+import com.laolu.shipbackend.model.request.user.RegisterRequest;
 import com.laolu.shipbackend.model.response.UserResponse;
 import com.laolu.shipbackend.service.UserService;
+import com.laolu.shipbackend.utils.CommonResponse;
 import com.laolu.shipbackend.utils.JsonResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.laolu.shipbackend.utils.AESTools;
 
@@ -19,12 +22,12 @@ import java.util.Map;
 @RestController
 @CrossOrigin
 @RequestMapping("/api")
-public class LoginController {
+public class UserController {
 
     @Autowired
     UserService userService;
 
-    @RequestMapping("/login")
+    @PostMapping("/login")
     public String login(@RequestBody Map<String,String> data) throws Exception {
         String str = data.get("data");
         User req = new Gson().fromJson(AESTools.decrypt(str,"0D7FB71E8EC31E97"),User.class);
@@ -35,5 +38,10 @@ public class LoginController {
         } else {
             return JsonResponse.success(user,"0D70523E8EC31E97");
         }
+    }
+
+    @PostMapping("/reg")
+    public CommonResponse<String> login(@Validated @RequestBody RegisterRequest request) {
+        return userService.register(request);
     }
 }

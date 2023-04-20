@@ -1,7 +1,9 @@
 package com.laolu.shipbackend.common;
 
+import com.laolu.shipbackend.utils.CommonResponse;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -16,8 +18,9 @@ import javax.validation.ConstraintViolationException;
 public class GlobleExceptionHandle {
 
     @ExceptionHandler(value = BindException.class)
-    public void exceptionHandler500(BindException e){
+    public CommonResponse<String> exceptionHandler500(MethodArgumentNotValidException e){
         e.printStackTrace();
+        return CommonResponse.error("参数验证失败！");
     }
 
     @ExceptionHandler(value = ConstraintViolationException.class)

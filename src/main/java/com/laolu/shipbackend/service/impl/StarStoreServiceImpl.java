@@ -1,16 +1,19 @@
 package com.laolu.shipbackend.service.impl;
 
+import com.laolu.shipbackend.config.consts.CommonCode;
+import com.laolu.shipbackend.config.consts.StoreCode;
 import com.laolu.shipbackend.dao.StoreMapper;
 import com.laolu.shipbackend.dao.UserMapper;
-import com.laolu.shipbackend.jpa.entity.QSellEntity;
-import com.laolu.shipbackend.jpa.entity.QStoreEntity;
+import com.laolu.shipbackend.jpa.entity.*;
 import com.laolu.shipbackend.model.Goods;
 import com.laolu.shipbackend.model.User;
 import com.laolu.shipbackend.model.request.store.BuyRequest;
 import com.laolu.shipbackend.model.request.store.SellRequest;
 import com.laolu.shipbackend.model.response.StarStoreListResponse;
 import com.laolu.shipbackend.service.StarStoreService;
+import com.laolu.shipbackend.utils.CommonResponse;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,28 +41,53 @@ public class StarStoreServiceImpl implements StarStoreService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean buy(BuyRequest buyRequest) {
+    public CommonResponse<String> buy(BuyRequest buyRequest) {
         try {
-            Goods goods = storeMapper.getStarGoodsById(buyRequest);
-            if (ObjectUtils.isEmpty(goods)) {
-                return false;
+            QSellEntity qSellEntity = QSellEntity.sellEntity;
+            SellEntity sellEntity = jpaQueryFactory.select(qSellEntity).from(qSellEntity)
+                    .where(qSellEntity.id.eq(buyRequest.getTargetId())).fetchOne();
+
+            if (ObjectUtils.isEmpty(sellEntity)) {
+                return CommonResponse.error("无商品信息");
             }
-            int price = buyRequest.getAmount() * goods.getPrice();
-            User user = userMapper.getUserByIdWithMoneyCondition(buyRequest.getUserId(), price);
-            if (ObjectUtils.isEmpty(user)) {
-                return false;
+
+            if (sellEntity.getLeftAmount() < 1) {
+                return CommonResponse.error("商品已无库存");
             }
-            if (user.getMoney() > goods.getPrice()) {
-                User update = new User();
-                update.setId(user.getId());
-                update.setMoney(user.getMoney() - price);
-                userMapper.update(update);
+
+
+            int price = buyRequest.getAmount() * sellEntity.getPrice();
+            QUserEntity qUserEntity = QUserEntity.userEntity;
+            UserEntity userEntity = jpaQueryFactory.select(qUserEntity).from(qUserEntity)
+                    .where(qUserEntity.id.eq(buyRequest.getUserId())).fetchOne();
+
+            if (ObjectUtils.isEmpty(userEntity)) {
+                return CommonResponse.error("无用户信息");
             }
-            return true;
+
+            CommonResponse<String> commonResponse = CommonResponse.success("购买成功！");
+
+            // 如果是系统出售的，玩家扣钱
+            if (sellEntity.getType() == StoreCode.SELL) {
+                if (userEntity.getMoney() > price) {
+                    userEntity.setMoney(userEntity.getMoney() - price);
+                }
+            } else {
+                // 系统收购，玩家增加金额，背包增加物品
+                userEntity.setMoney(userEntity.getMoney() + price);
+                commonResponse.setMessage("出售成功！");
+            }
+
+            long execute = jpaQueryFactory.update(qUserEntity).set(qUserEntity.money, price).where(qSellEntity.id.eq(buyRequest.getUserId())).execute();
+            if (execute == CommonCode.SUCCESS) {
+                return commonResponse;
+            }
+
+            return CommonResponse.error("操作失败！");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
-            return false;
+            return CommonResponse.error("系统错误！");
         }
     }
 
@@ -74,6 +102,7 @@ public class StarStoreServiceImpl implements StarStoreService {
         QSellEntity qSellEntity = QSellEntity.sellEntity;
         return jpaQueryFactory.
                 select(Projections.bean(StarStoreListResponse.class,
+                        qStoreEntity.id,
                         qStoreEntity.name,
                         qStoreEntity.description,
                         qStoreEntity.pic,

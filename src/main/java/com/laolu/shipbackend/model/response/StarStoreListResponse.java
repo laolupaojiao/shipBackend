@@ -9,6 +9,7 @@ import lombok.Data;
 
 @Data
 public class StarStoreListResponse {
+    private Integer id;
     private String name;
     private String description;
     private String pic;

@@ -36,24 +36,27 @@ public class UserEntity implements BaseEntity {
     @Column(name = "email", columnDefinition = "varchar(300) default '' comment '邮箱'")
     private String email;
 
-    @Column(name = "money", columnDefinition = "int default 0 comment '金钱'")
+    @Column(name = "money",insertable = false , columnDefinition = "int default 0 comment '金钱'")
     private Integer money;
 
-    @Column(name = "galaxy_id", columnDefinition = "int default 1 comment '星系ID'")
+    @Column(name = "galaxy_id",insertable = false , columnDefinition = "int default 1 comment '星系ID'")
     private Integer galaxyId;
 
     @Column(name = "auth_key", columnDefinition = "varchar(300) default '' comment '解码'")
     private String authKey;
 
-    @Column(name = "pos_x", columnDefinition = "double default 0 comment '世界X坐标'")
+    @Column(name = "pos_x",insertable = false , columnDefinition = "double default 200 comment '世界X坐标'")
     private Double posX;
 
-    @Column(name = "pos_y", columnDefinition = "double default 0 comment '世界Y坐标'")
+    @Column(name = "pos_y",insertable = false , columnDefinition = "double default 200 comment '世界Y坐标'")
     private Double posY;
 
-    @Column(name = "avatar", columnDefinition = "varchar(100) default 'avatar1' comment '头像'")
+    @Column(name = "avatar",insertable = false , columnDefinition = "varchar(100) default 'avatar1' comment '头像'")
     private String avatar;
 
-    @Column(name = "status", columnDefinition = "tinyint default 1 comment '状态'")
+    @Column(name = "move_level",insertable = false , columnDefinition = "int default 1 comment '移动等级'")
+    private Integer moveLevel;
+
+    @Column(name = "status",insertable = false , columnDefinition = "tinyint default 1 comment '状态'")
     private Integer status;
 }

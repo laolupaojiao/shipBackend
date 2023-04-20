@@ -25,8 +25,6 @@ public class SocketHandle extends TextWebSocketHandler {
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
         try {
-            System.out.println("收到消息"+session.getId().substring(session.getId().length()-2));
-            System.out.println(message.getPayload());
             JsonObject json = new Gson().fromJson(message.getPayload(), JsonObject.class);
             String reqContent = json.getAsJsonObject().get("data").getAsString();
             String reqClass = json.getAsJsonObject().get("class").getAsString();
