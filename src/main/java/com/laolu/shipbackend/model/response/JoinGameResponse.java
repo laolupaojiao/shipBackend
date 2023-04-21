@@ -1,6 +1,5 @@
 package com.laolu.shipbackend.model.response;
 
-import com.laolu.shipbackend.model.Star;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,7 +14,7 @@ import java.util.List;
 @Setter
 @ToString
 public class JoinGameResponse {
-    List<Star> stars;
+    List<StarResponse> stars;
     List<UserResponse> players;
     private String token;
 }

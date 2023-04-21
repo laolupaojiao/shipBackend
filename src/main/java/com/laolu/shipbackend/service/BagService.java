@@ -29,7 +29,7 @@ public interface BagService {
     CommonResponse<String> deleteItem(Integer userId, Integer storeId, Integer amount);
 
     /**
-     * 给玩家删除物品
+     * 获取玩家物品列表
      * @param userId 用户ID
      * @return CommonResponse<String>
      */

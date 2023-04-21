@@ -3,6 +3,7 @@ package com.laolu.shipbackend.controller;
 import com.google.gson.Gson;
 import com.laolu.shipbackend.model.User;
 import com.laolu.shipbackend.model.request.user.RegisterRequest;
+import com.laolu.shipbackend.model.response.OrderResponse;
 import com.laolu.shipbackend.model.response.UserResponse;
 import com.laolu.shipbackend.service.UserService;
 import com.laolu.shipbackend.utils.CommonResponse;
@@ -12,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.laolu.shipbackend.utils.AESTools;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,5 +45,10 @@ public class UserController {
     @PostMapping("/reg")
     public CommonResponse<String> login(@Validated @RequestBody RegisterRequest request) {
         return userService.register(request);
+    }
+
+    @GetMapping("/order")
+    public CommonResponse<List<OrderResponse>> order() {
+        return userService.order();
     }
 }

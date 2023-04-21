@@ -5,19 +5,16 @@ import com.laolu.shipbackend.jpa.dao.BagDao;
 import com.laolu.shipbackend.jpa.entity.BagEntity;
 import com.laolu.shipbackend.jpa.entity.QBagEntity;
 import com.laolu.shipbackend.jpa.entity.QStoreEntity;
-import com.laolu.shipbackend.jpa.entity.StoreEntity;
 import com.laolu.shipbackend.model.response.BagItemResponse;
 import com.laolu.shipbackend.service.BagService;
 import com.laolu.shipbackend.utils.CommonResponse;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.SubQueryExpression;
-import com.querydsl.core.types.SubQueryExpressionImpl;
+import com.querydsl.core.types.dsl.BooleanTemplate;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.hibernate.criterion.SubqueryExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -68,17 +65,17 @@ public class BagServiceImpl implements BagService {
 
     @Override
     public CommonResponse<List<BagItemResponse>> getItems(Integer userId) {
-        System.out.println(userId);
         QBagEntity bagEntity = QBagEntity.bagEntity;
         QStoreEntity storeEntity = QStoreEntity.storeEntity;
+        NumberExpression<Integer> amount = Expressions.numberTemplate(Integer.class, "sum({0})", bagEntity.amount);
         JPAQuery<BagItemResponse> query = jpaQueryFactory.select(Projections.bean(BagItemResponse.class,
                         storeEntity.name.as("name"),
                         storeEntity.pic.as("pic"),
                         storeEntity.description.as("description"),
-                        Expressions.simpleTemplate(Integer.class, "sum({0})", bagEntity.amount).as("amount")
+                        amount.as("amount")
                 )).from(bagEntity)
                 .leftJoin(storeEntity).on(storeEntity.id.eq(bagEntity.storeId))
-                .where(bagEntity.userId.eq(userId)).groupBy(bagEntity.storeId);
+                .where(bagEntity.userId.eq(userId)).having(amount.goe(1)).groupBy(bagEntity.storeId);
         List<BagItemResponse> items = query.fetch();
         return CommonResponse.success(items);
     }

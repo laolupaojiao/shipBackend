@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.laolu.shipbackend.model.Heartbeat;
 import com.laolu.shipbackend.model.SocketClient;
-import com.laolu.shipbackend.model.Star;
+import com.laolu.shipbackend.model.response.StarResponse;
 import com.laolu.shipbackend.model.User;
 import com.laolu.shipbackend.model.response.HeartBeatResponse;
 import com.laolu.shipbackend.model.response.JoinGameResponse;
@@ -48,11 +48,11 @@ public class MainHandler {
         System.out.println(user + "加入游戏");
         if(user.getAuthKey() != null) {
             if (!SocketHandle.USER_IDS.contains(user.getId())) {
-                System.out.println("进入初始化");
-                List<Star> stars = starService.getStarList(user.getGalaxyId());
+                List<StarResponse> starResponses = starService.getStarList(user.getGalaxyId());
                 List<UserResponse> players = new ArrayList<>();
                 SocketClient socketClient = new SocketClient();
                 socketClient.setWebSocketSession(session);
+                user.setToken(session.getId());
                 socketClient.setUser(user);
                 JoinGameResponse joinGameResponse = new JoinGameResponse();
                 for (Map.Entry<String, SocketClient> player : SocketHandle.CLIENT_POOL.entrySet()) {
@@ -66,7 +66,7 @@ public class MainHandler {
                         }
                     }
                 }
-                joinGameResponse.setStars(stars);
+                joinGameResponse.setStars(starResponses);
                 joinGameResponse.setPlayers(players);
                 joinGameResponse.setToken(session.getId());
                 session.sendMessage(new TextMessage(JsonResponse.success(joinGameResponse, ContactType.JOIN_GAME, user.getAuthKey())));
@@ -93,10 +93,8 @@ public class MainHandler {
     }
 
     public void heartBeat(String req, WebSocketSession session) {
-        System.out.println(SocketHandle.CLIENT_POOL.get(session.getId()) + "心跳");
         String reqdata = AESTools.decrypt(req,SocketHandle.CLIENT_POOL.get(session.getId()).getUser().getAuthKey());
         Heartbeat heartbeat = new Gson().fromJson(reqdata, Heartbeat.class);
-        System.out.println(heartbeat);
         SocketHandle.CLIENT_POOL.get(session.getId()).getUser().setPosX(heartbeat.getPosX());
         SocketHandle.CLIENT_POOL.get(session.getId()).getUser().setPosY(heartbeat.getPosY());
         List<UserResponse> players = new ArrayList<>();

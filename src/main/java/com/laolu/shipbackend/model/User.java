@@ -25,4 +25,5 @@ public class User {
     private Double posX;
     private Double posY;
     private Integer status;
+    private String token;
 }

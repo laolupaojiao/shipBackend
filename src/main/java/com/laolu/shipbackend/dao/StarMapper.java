@@ -1,6 +1,6 @@
 package com.laolu.shipbackend.dao;
 
-import com.laolu.shipbackend.model.Star;
+import com.laolu.shipbackend.model.response.StarResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -13,5 +13,5 @@ import java.util.List;
 @Mapper
 public interface StarMapper {
     @Select("select * from ship_star where galaxy_id=#{galaxyId}")
-    List<Star> getStarListByGalaxyId(int galaxyId);
+    List<StarResponse> getStarListByGalaxyId(int galaxyId);
 }

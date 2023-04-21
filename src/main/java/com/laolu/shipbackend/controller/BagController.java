@@ -24,8 +24,8 @@ public class BagController {
     @Autowired
     BagService bagService;
 
-    @GetMapping("/{id}")
-    public CommonResponse<List<BagItemResponse>> getStoreListByStarId(@PathVariable Integer id) {
-        return bagService.getItems(id);
+    @GetMapping("")
+    public CommonResponse<List<BagItemResponse>> getBagItems() {
+        return bagService.getItems(UserPool.getUser().getId());
     }
 }

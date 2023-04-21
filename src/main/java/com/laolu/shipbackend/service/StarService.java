@@ -1,6 +1,6 @@
 package com.laolu.shipbackend.service;
 
-import com.laolu.shipbackend.model.Star;
+import com.laolu.shipbackend.model.response.StarResponse;
 
 import java.util.List;
 
@@ -9,5 +9,5 @@ import java.util.List;
  * @date Created in 2022/9/11 13:57
  */
 public interface StarService {
-    List<Star> getStarList(int galaxyId);
+    List<StarResponse> getStarList(int galaxyId);
 }

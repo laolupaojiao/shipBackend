@@ -1,24 +1,17 @@
 package com.laolu.shipbackend.jpa.entity;
 
-import com.google.gson.annotations.SerializedName;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 /**
  * @author wanyi.lu
- * @date Created in 2023/4/18 17:05
+ * @date Created in 2023/4/20 13:15
  */
-
-@Getter
-@Setter
-@ToString
-@Entity
-@Table(name = "ship_bag")
-public class BagEntity implements BaseEntity {
+public class NewsEntity implements BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "custom-id")
     @GenericGenerator(name = "custom-id", strategy = "com.laolu.shipbackend.jpa.CustomIDGenerator")
@@ -34,7 +27,7 @@ public class BagEntity implements BaseEntity {
     @Column(name = "amount", columnDefinition = "int default 0 comment '数量'")
     private Integer amount;
 
-    @Column(insertable = false, name = "status", columnDefinition = "tinyint default 1 comment '状态'")
+    @Column(name = "status", columnDefinition = "tinyint default 1 comment '状态'")
     private Integer status;
 
     @Column(name = "create_time", insertable = false, updatable = false, columnDefinition = "TIMESTAMP default current_timestamp null comment '创建时间'")

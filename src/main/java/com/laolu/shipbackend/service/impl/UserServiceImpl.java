@@ -8,6 +8,7 @@ import com.laolu.shipbackend.jpa.entity.UserEntity;
 import com.laolu.shipbackend.model.RegCode;
 import com.laolu.shipbackend.model.User;
 import com.laolu.shipbackend.model.request.user.RegisterRequest;
+import com.laolu.shipbackend.model.response.OrderResponse;
 import com.laolu.shipbackend.model.response.UserResponse;
 import com.laolu.shipbackend.service.CacheService;
 import com.laolu.shipbackend.service.UserService;
@@ -15,11 +16,15 @@ import com.laolu.shipbackend.utils.AESTools;
 import com.laolu.shipbackend.utils.CommonResponse;
 import com.laolu.shipbackend.utils.CommonTools;
 import com.laolu.shipbackend.utils.MailTool;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -76,5 +81,18 @@ public class UserServiceImpl implements UserService {
 
         userDao.save(user);
         return CommonResponse.success("注册成功！");
+    }
+
+    @Override
+    public CommonResponse<List<OrderResponse>> order() {
+        QUserEntity qUserEntity = QUserEntity.userEntity;
+
+        OrderSpecifier orderSpecifier = new OrderSpecifier(Order.DESC, qUserEntity.money);
+        List<OrderResponse> fetch = jpaQueryFactory.select(Projections.bean(
+                OrderResponse.class,
+                qUserEntity.nickName,
+                qUserEntity.money
+        )).from(qUserEntity).orderBy(orderSpecifier).offset(0).limit(30).fetch();
+        return CommonResponse.success(fetch);
     }
 }

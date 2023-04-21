@@ -1,15 +1,19 @@
 package com.laolu.shipbackend.service.impl;
 
 import com.laolu.shipbackend.config.consts.CommonCode;
+import com.laolu.shipbackend.config.consts.ResponseCode;
 import com.laolu.shipbackend.config.consts.StoreCode;
 import com.laolu.shipbackend.dao.StoreMapper;
 import com.laolu.shipbackend.dao.UserMapper;
+import com.laolu.shipbackend.jpa.dao.StoreDao;
+import com.laolu.shipbackend.jpa.dao.UserDao;
 import com.laolu.shipbackend.jpa.entity.*;
 import com.laolu.shipbackend.model.Goods;
 import com.laolu.shipbackend.model.User;
 import com.laolu.shipbackend.model.request.store.BuyRequest;
 import com.laolu.shipbackend.model.request.store.SellRequest;
 import com.laolu.shipbackend.model.response.StarStoreListResponse;
+import com.laolu.shipbackend.service.BagService;
 import com.laolu.shipbackend.service.StarStoreService;
 import com.laolu.shipbackend.utils.CommonResponse;
 import com.querydsl.core.types.Projections;
@@ -34,13 +38,18 @@ public class StarStoreServiceImpl implements StarStoreService {
     @Autowired
     StoreMapper storeMapper;
     @Autowired
-    UserMapper userMapper;
+    UserDao userDao;
+    @Autowired
+    StoreDao storeDao;
 
     @Autowired
     JPAQueryFactory jpaQueryFactory;
 
+    @Autowired
+    BagService bagService;
+
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public CommonResponse<String> buy(BuyRequest buyRequest) {
         try {
             QSellEntity qSellEntity = QSellEntity.sellEntity;
@@ -69,23 +78,40 @@ public class StarStoreServiceImpl implements StarStoreService {
 
             // 如果是系统出售的，玩家扣钱
             if (sellEntity.getType() == StoreCode.SELL) {
-                if (userEntity.getMoney() > price) {
+                System.out.println("玩家购买");
+                if (userEntity.getMoney() >= price) {
                     userEntity.setMoney(userEntity.getMoney() - price);
+                    sellEntity.setLeftAmount(sellEntity.getLeftAmount() - buyRequest.getAmount());
+                    bagService.addItem(userEntity.getId(), buyRequest.getTargetId(), buyRequest.getAmount());
+                } else {
+                    commonResponse.setMessage("没这么多钱");
+                    commonResponse.setCode(ResponseCode.ERROR);
+                    return commonResponse;
                 }
             } else {
                 // 系统收购，玩家增加金额，背包增加物品
+                if (bagService.deleteItem(userEntity.getId(), buyRequest.getTargetId(), buyRequest.getAmount()).getCode() != ResponseCode.SUCCESS) {
+                    commonResponse.setMessage("没那么多物品");
+                    commonResponse.setCode(ResponseCode.ERROR);
+                    return commonResponse;
+                }
                 userEntity.setMoney(userEntity.getMoney() + price);
                 commonResponse.setMessage("出售成功！");
             }
 
-            long execute = jpaQueryFactory.update(qUserEntity).set(qUserEntity.money, price).where(qSellEntity.id.eq(buyRequest.getUserId())).execute();
+            jpaQueryFactory.update(qSellEntity)
+                    .set(qSellEntity.leftAmount, sellEntity.getLeftAmount() - buyRequest.getAmount())
+                    .where(qSellEntity.id.eq(buyRequest.getTargetId()))
+                    .execute();
+
+            System.out.println(userEntity.getMoney());
+
+            long execute = jpaQueryFactory.update(qUserEntity).set(qUserEntity.money, userEntity.getMoney()).where(qUserEntity.id.eq(buyRequest.getUserId())).execute();
             if (execute == CommonCode.SUCCESS) {
                 return commonResponse;
             }
-
             return CommonResponse.error("操作失败！");
         } catch (Exception e) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             e.printStackTrace();
             return CommonResponse.error("系统错误！");
         }
