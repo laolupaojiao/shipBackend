@@ -7,30 +7,18 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 
 public class AESTools {
     public static String encrypt(String sSrc, String sKey) {
-        if (sKey == null) {
-            System.out.print("Key为空null");
-            return null;
-        }
-        // 判断Key是否为16位
-        if (sKey.length() != 16) {
-            System.out.print("Key长度不是16位");
+        if (sKey == null || sKey.length() != 16) {
             return null;
         }
         try {
-            byte[] raw = sKey.getBytes("utf-8");
+            byte[] raw = sKey.getBytes(StandardCharsets.UTF_8);
             SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-            //"算法/模式/补码方式"
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
-            byte[] encrypted = cipher.doFinal(sSrc.getBytes("utf-8"));
-            //此处使用BASE64做转码功能，同时能起到2次加密的作用。
+            byte[] encrypted = cipher.doFinal(sSrc.getBytes(StandardCharsets.UTF_8));
             return new Base64().encodeToString(encrypted);
         } catch (Exception e) {
             e.printStackTrace();

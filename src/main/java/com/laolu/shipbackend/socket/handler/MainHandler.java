@@ -45,7 +45,6 @@ public class MainHandler {
     public void joinGame(String req, WebSocketSession session) throws IOException {
         String reqdata = AESTools.decrypt(req,"0D7FB71E8EC31E97");
         User user = GSON.fromJson(reqdata, User.class);
-        System.out.println(user + "加入游戏");
         if(user.getAuthKey() != null) {
             if (!SocketHandle.USER_IDS.contains(user.getId())) {
                 List<StarResponse> starResponses = starService.getStarList(user.getGalaxyId());
@@ -53,6 +52,7 @@ public class MainHandler {
                 SocketClient socketClient = new SocketClient();
                 socketClient.setWebSocketSession(session);
                 user.setToken(session.getId());
+                user.setLastBeatTime(System.currentTimeMillis());
                 socketClient.setUser(user);
                 JoinGameResponse joinGameResponse = new JoinGameResponse();
                 for (Map.Entry<String, SocketClient> player : SocketHandle.CLIENT_POOL.entrySet()) {
@@ -80,7 +80,7 @@ public class MainHandler {
                     if (player.getValue().getWebSocketSession().isOpen()) {
                         if (player.getValue().getUser().getGalaxyId().intValue() == user.getGalaxyId().intValue()  && player.getValue().getUser().getId().intValue() != user.getId().intValue()) {
                             try {
-                                player.getValue().getWebSocketSession().sendMessage(new TextMessage(JsonResponse.success(userResponse, ContactType.NEW_PLAYERS, user.getAuthKey())));
+                                player.getValue().getWebSocketSession().sendMessage(new TextMessage(JsonResponse.success(userResponse, ContactType.NEW_PLAYERS, player.getValue().getUser().getAuthKey())));
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -94,6 +94,7 @@ public class MainHandler {
 
     public void heartBeat(String req, WebSocketSession session) {
         String reqdata = AESTools.decrypt(req,SocketHandle.CLIENT_POOL.get(session.getId()).getUser().getAuthKey());
+        SocketHandle.CLIENT_POOL.get(session.getId()).getUser().setLastBeatTime(System.currentTimeMillis());
         Heartbeat heartbeat = new Gson().fromJson(reqdata, Heartbeat.class);
         SocketHandle.CLIENT_POOL.get(session.getId()).getUser().setPosX(heartbeat.getPosX());
         SocketHandle.CLIENT_POOL.get(session.getId()).getUser().setPosY(heartbeat.getPosY());
@@ -101,7 +102,8 @@ public class MainHandler {
         User user = SocketHandle.CLIENT_POOL.get(session.getId()).getUser();
         for (Map.Entry<String, SocketClient> player : SocketHandle.CLIENT_POOL.entrySet()) {
             if (player.getValue().getWebSocketSession().isOpen()) {
-                if (player.getValue().getUser().getGalaxyId().intValue() == user.getGalaxyId().intValue() && player.getValue().getUser().getId().intValue() != user.getId().intValue()) {
+                if (player.getValue().getUser().getGalaxyId().intValue() == user.getGalaxyId().intValue()
+                        && player.getValue().getUser().getId().intValue() != user.getId().intValue()) {
                     UserResponse userResponse = new UserResponse();
                     userResponse.setPosX(player.getValue().getUser().getPosX());
                     userResponse.setPosY(player.getValue().getUser().getPosY());
@@ -127,23 +129,30 @@ public class MainHandler {
             if (player.getValue().getWebSocketSession().isOpen()) {
                 if (player.getValue().getUser().getGalaxyId().intValue() == leftUser.getGalaxyId().intValue()) {
                     try {
-                        player.getValue().getWebSocketSession().sendMessage(new TextMessage(JsonResponse.success(jsonObject, ContactType.LEFT_GAME, player.getValue().getUser().getAuthKey())));
+                        player.getValue().getWebSocketSession().sendMessage(
+                                new TextMessage(
+                                        JsonResponse.success(jsonObject, ContactType.LEFT_GAME, player.getValue().getUser().getAuthKey())
+                                )
+                        );
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
         }
-        System.out.println(leftUser + "退出");
         SocketHandle.USER_IDS.remove(leftUser.getId());
         SocketHandle.CLIENT_POOL.remove(session.getId());
     }
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0/3 * * * * ?")
     public void execute() {
         for (Map.Entry<String, SocketClient> player : SocketHandle.CLIENT_POOL.entrySet()) {
-            if (!player.getValue().getWebSocketSession().isOpen()) {
-                System.out.println("有人离线");
+            boolean left = !player.getValue().getWebSocketSession().isOpen();
+            User user = player.getValue().getUser();
+            if (System.currentTimeMillis() - user.getLastBeatTime() > 5000) {
+                left = true;
+            }
+            if (left) {
                 leftGame(null, player.getValue().getWebSocketSession());
             }
         }

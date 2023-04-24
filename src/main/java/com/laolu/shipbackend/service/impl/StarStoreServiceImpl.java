@@ -60,8 +60,8 @@ public class StarStoreServiceImpl implements StarStoreService {
                 return CommonResponse.error("无商品信息");
             }
 
-            if (sellEntity.getLeftAmount() < 1) {
-                return CommonResponse.error("商品已无库存");
+            if (sellEntity.getLeftAmount() < 1 || buyRequest.getAmount() > sellEntity.getLeftAmount()) {
+                return CommonResponse.error("商品没那么多库存");
             }
 
 
@@ -90,7 +90,7 @@ public class StarStoreServiceImpl implements StarStoreService {
                 }
             } else {
                 // 系统收购，玩家增加金额，背包增加物品
-                if (bagService.deleteItem(userEntity.getId(), buyRequest.getTargetId(), buyRequest.getAmount()).getCode() != ResponseCode.SUCCESS) {
+                if (bagService.deleteItem(userEntity.getId(), sellEntity.getStoreId(), buyRequest.getAmount()).getCode() != ResponseCode.SUCCESS) {
                     commonResponse.setMessage("没那么多物品");
                     commonResponse.setCode(ResponseCode.ERROR);
                     return commonResponse;
@@ -128,7 +128,7 @@ public class StarStoreServiceImpl implements StarStoreService {
         QSellEntity qSellEntity = QSellEntity.sellEntity;
         return jpaQueryFactory.
                 select(Projections.bean(StarStoreListResponse.class,
-                        qStoreEntity.id,
+                        qSellEntity.id,
                         qStoreEntity.name,
                         qStoreEntity.description,
                         qStoreEntity.pic,

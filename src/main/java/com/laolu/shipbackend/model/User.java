@@ -26,4 +26,6 @@ public class User {
     private Double posY;
     private Integer status;
     private String token;
+
+    private long lastBeatTime;
 }

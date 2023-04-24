@@ -56,18 +56,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public CommonResponse<String> register(RegisterRequest request) {
         RegCode redisMail = (RegCode) cacheService.getData(request.getEmail());
-        if (redisMail == null || !redisMail.getCode().equals(request.getCode()) || System.currentTimeMillis() - redisMail.getTime() > 180000) {
+        if (redisMail == null ||
+                !redisMail.getCode().equals(request.getCode())
+                || System.currentTimeMillis() - redisMail.getTime() > 180000) {
             return CommonResponse.error("验证码错误或失效！");
         }
-
         UserEntity user = new UserEntity();
         user.setUserName(request.getUserName());
         user.setNickName(request.getNickName());
         user.setPassWord(AESTools.md5(request.getPassWord()));
         user.setEmail(request.getEmail());
         user.setAuthKey(AESTools.md5(String.valueOf(System.currentTimeMillis())).substring(0,16));
-        System.out.println(user.getAuthKey());
-
+        user.setMoney(1000);
         QUserEntity userEntity = QUserEntity.userEntity;
         Long check = jpaQueryFactory.select(Expressions.simpleTemplate(Long.class, "count(id)"))
                 .from(userEntity).where(
@@ -78,7 +78,6 @@ public class UserServiceImpl implements UserService {
         if (check != null && check > 1) {
             return CommonResponse.error("用户名或昵称重复！");
         }
-
         userDao.save(user);
         return CommonResponse.success("注册成功！");
     }

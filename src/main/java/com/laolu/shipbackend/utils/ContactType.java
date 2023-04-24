@@ -10,4 +10,5 @@ public class ContactType {
     public static final int HEART_BEAT = 0;
     public static final int NEW_PLAYERS = 3;
     public static final int LEFT_GAME = 4;
+    public static final int CONNECTION = 5;
 }

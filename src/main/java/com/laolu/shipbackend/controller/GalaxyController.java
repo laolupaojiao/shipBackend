@@ -70,7 +70,7 @@ public class GalaxyController {
                             in.setNickName(user.getNickName());
 
                             try {
-                                player.getValue().getWebSocketSession().sendMessage(new TextMessage(JsonResponse.success(in, ContactType.NEW_PLAYERS, user.getAuthKey())));
+                                player.getValue().getWebSocketSession().sendMessage(new TextMessage(JsonResponse.success(in, ContactType.NEW_PLAYERS, player.getValue().getUser().getAuthKey())));
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
