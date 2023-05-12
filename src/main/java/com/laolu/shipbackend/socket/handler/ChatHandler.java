@@ -23,7 +23,11 @@ public class ChatHandler {
         String reqdata = AESTools.decrypt(req, SocketHandle.CLIENT_POOL.get(session.getId()).getUser().getAuthKey());
         ChatMessageResponse chatMessageResponse = new Gson().fromJson(reqdata, ChatMessageResponse.class);
         for (Map.Entry<String, SocketClient> player : SocketHandle.CLIENT_POOL.entrySet()) {
-            WebSocketMessage<String> webSocketMessage = new TextMessage(JsonResponse.success(chatMessageResponse, ContactType.SEND_MESSAGE,player.getValue().getUser().getAuthKey()));
+            WebSocketMessage<String> webSocketMessage = new TextMessage(
+                    JsonResponse.success(
+                            chatMessageResponse, ContactType.SEND_MESSAGE,player.getValue().getUser().getAuthKey()
+                    )
+            );
             if (player.getValue().getWebSocketSession().isOpen()) {
                 try {
                     player.getValue().getWebSocketSession().sendMessage(webSocketMessage);

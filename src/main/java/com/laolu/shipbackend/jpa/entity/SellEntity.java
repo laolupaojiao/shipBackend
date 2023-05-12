@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 
@@ -17,6 +18,7 @@ import javax.persistence.*;
 @ToString
 @Entity
 @Table(name = "ship_sell")
+@Where(clause = "status = 1")
 public class SellEntity implements BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "custom-id")
@@ -42,6 +44,6 @@ public class SellEntity implements BaseEntity{
     @Column(name = "origin_amount", columnDefinition = "int default 0 comment '初始数量'")
     private Integer originAmount;
 
-    @Column(name = "status", columnDefinition = "tinyint default 1 comment '状态'")
+    @Column(insertable = false, name = "status", columnDefinition = "tinyint default 1 comment '状态'")
     private Integer status;
 }

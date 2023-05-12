@@ -104,8 +104,6 @@ public class StarStoreServiceImpl implements StarStoreService {
                     .where(qSellEntity.id.eq(buyRequest.getTargetId()))
                     .execute();
 
-            System.out.println(userEntity.getMoney());
-
             long execute = jpaQueryFactory.update(qUserEntity).set(qUserEntity.money, userEntity.getMoney()).where(qUserEntity.id.eq(buyRequest.getUserId())).execute();
             if (execute == CommonCode.SUCCESS) {
                 return commonResponse;

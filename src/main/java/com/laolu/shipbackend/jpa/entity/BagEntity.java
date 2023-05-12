@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 
@@ -18,6 +19,7 @@ import javax.persistence.*;
 @ToString
 @Entity
 @Table(name = "ship_bag")
+@Where(clause = "status = 1")
 public class BagEntity implements BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "custom-id")

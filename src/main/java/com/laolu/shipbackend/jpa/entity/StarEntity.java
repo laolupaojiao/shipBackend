@@ -20,7 +20,6 @@ import javax.validation.constraints.NotNull;
 @ToString
 @Entity
 @Table(name = "ship_star")
-@SQLDelete(sql = "UPDATE ship_star SET status=-1 WHERE id=?")
 @Where(clause = "status=1")
 public class StarEntity implements BaseEntity {
     @Id
@@ -44,9 +43,12 @@ public class StarEntity implements BaseEntity {
     @Column(name = "pic", columnDefinition = "varchar(100) default 'star1.png' comment '星球图片'")
     private String pic;
 
+    @Column(name = "point", columnDefinition = "float default 1 comment '投资回馈率'")
+    private String point;
+
     @Column(name = "galaxy_id", columnDefinition = "int default 1 comment '星系ID'")
     private Integer galaxyId;
 
-    @Column(name = "status", columnDefinition = "tinyint default 1 comment '状态'")
+    @Column(insertable = false, name = "status", columnDefinition = "tinyint default 1 comment '状态'")
     private Integer status;
 }
